@@ -66,6 +66,8 @@ const App = () => {
     connected: false
   });
   const [resolveError, setResolveError] = useState("");
+  const [rateLimitError, setRateLimitError] = useState("");
+  const [callsRemaining, setCallsRemaining] = useState(null); // null = not yet fetched
   const [assistantsLoading, setAssistantsLoading] = useState(false);
   const [userEmail, setUserEmail] = useState(localStorage.getItem('userEmail') || '');
   const [assistantState, setAssistantState] = useState({
@@ -80,7 +82,10 @@ const App = () => {
   const vapiRef = useRef(null);
   useEffect(() => {
     const key = selected.includes("changebridge") ? VAPI_PUBLIC_KEYS.changebridge : (selected.includes("careshield-appointment") ? VAPI_PUBLIC_KEYS.careshield : VAPI_PUBLIC_KEYS.default);
-    const v = new Vapi(key);
+    // Route the single HTTP call the SDK makes (POST /call/web) through our own
+    // Cloudflare Pages Function so "api.vapi.ai" never appears in the network tab.
+    const vapiBaseUrl = `${window.location.origin}/api/vapi`;
+    const v = new Vapi(key, vapiBaseUrl);
     vapiRef.current = v;
 
     // Register event handlers on this instance
@@ -192,6 +197,25 @@ const App = () => {
     console.log("Page view sent to GA");
   }, []);
 
+  const rateLimitParams = `assistant=${encodeURIComponent(selected)}&email=${encodeURIComponent(userEmail)}`;
+
+  // Fetch rate limit status on mount
+  useEffect(() => {
+    if (!userEmail) return;
+    fetch(`/api/rate-check?${rateLimitParams}`)
+      .then(res => res.json())
+      .then(data => {
+        setCallsRemaining(data.remaining ?? null);
+        if (!data.allowed) {
+          setRateLimitError(data.message || "Demo limit reached, please contact sales@keyreply.com for more information.");
+        }
+      })
+      .catch(err => {
+        // Non-fatal — don't block the demo if the check fails
+        console.warn("Rate limit check failed:", err);
+      });
+  }, [userEmail]);
+
   const handleEmailSubmit = (email) => {
     setUserEmail(email);
     localStorage.setItem('userEmail', email);
@@ -234,6 +258,24 @@ const App = () => {
   const startCall = useCallback(async () => {
     const assistantId = resolvedAssistantId;
     if (assistantId) {
+      // Check rate limit before attempting to start (server handles exemptions)
+      setRateLimitError("");
+      try {
+        const limitRes = await fetch(`/api/rate-check?${rateLimitParams}`);
+        const limitData = await limitRes.json();
+        setCallsRemaining(limitData.remaining ?? null);
+        if (!limitData.allowed) {
+          setRateLimitError(
+            limitData.message ||
+            "Demo limit reached, please contact sales@keyreply.com for more information."
+          );
+          return;
+        }
+      } catch (err) {
+        // Non-fatal — proceed with the call if the check itself errors
+        console.warn("Rate limit pre-check failed:", err);
+      }
+
       setCallState(prev => ({ ...prev, connecting: true }));
       try {
         // Start the call and get the call object with ID
@@ -241,7 +283,15 @@ const App = () => {
         
         // Get call ID from the call object
         const callId = call?.id || 'unknown';
-      
+
+        // Increment the rate limit counter (server handles exemptions)
+        fetch(`/api/rate-check?${rateLimitParams}`, { method: "POST" })
+          .then(res => res.json())
+          .then(data => {
+            setCallsRemaining(data.remaining ?? null);
+          })
+          .catch(err => console.warn("Rate limit POST failed:", err));
+
       // Track demo call start
       ReactGA.event({
         category: "VoiceDemo",
@@ -306,8 +356,8 @@ const App = () => {
                       "actions": [
                         {
                           "type": "Action.OpenUrl",
-                          "title": "Download Recording",
-                          "url": `https://dashboard.vapi.ai/calls/${callId}`
+                          "title": "View Recording",
+                          "url": `https://app.keyreply.com/calls/${callId}`
                         }
                       ]
                     }
@@ -368,13 +418,13 @@ const App = () => {
       );
     }
     
-    const labelBase = resolvedAssistantName || selected;
     const label = "Start Call";
-    const canCall = Boolean(resolvedAssistantId);
+    const isRateLimited = Boolean(rateLimitError);
+    const canCall = Boolean(resolvedAssistantId) && !isRateLimited;
     return (
       <div className="relative">
         <div className="w-[250px] h-[100px] mx-auto mb-4">
-          <CpuArchitecture 
+          <CpuArchitecture
             text={"Kira™"}
             animateText={true}
             animateLines={true}
@@ -390,9 +440,19 @@ const App = () => {
         >
           <span className="text-white font-semibold">{label}</span>
         </RainbowButton>
-        {!canCall && !assistantsLoading && (
+        {isRateLimited && (
+          <div className="mt-3 text-sm text-red-400">
+            Demo limit reached, please contact <a href="mailto:sales@keyreply.com" className="underline text-blue-400">sales@keyreply.com</a> for more information.
+          </div>
+        )}
+        {!isRateLimited && !canCall && !assistantsLoading && (
           <div className="mt-3 text-sm text-red-400">
             {resolveError || "Assistant not found for this URL."}
+          </div>
+        )}
+        {!isRateLimited && callsRemaining !== null && (
+          <div className="mt-3 text-xs text-gray-400 text-center">
+            {callsRemaining} demo{callsRemaining === 1 ? "" : "s"} remaining today
           </div>
         )}
       </div>
