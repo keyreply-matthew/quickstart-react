@@ -303,7 +303,7 @@ const App = () => {
       ReactGA.gtag('set', 'assistant_name', resolvedAssistantName || selected);
       console.log("Call start event sent to GA:", userEmail, selected);
       
-      if (!userEmail.includes("@keyreply.com")) {
+      if (!userEmail.includes("@keyreply.com") && !userEmail.includes("@fortnightcollective.com")) {
         // Send notification to Microsoft Teams webhook
         fetch('https://prod-184.westus.logic.azure.com:443/workflows/8ac9ed7498a04a98bd399619d53761e1/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=TgZkQtNjUUQiL4v4nvAieMZ1wXi6ZBp_spqKc3IBaXQ', {
           method: 'POST',

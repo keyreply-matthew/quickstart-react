@@ -9,7 +9,7 @@
  */
 
 const DAILY_LIMIT = 3;
-const EXEMPT_DOMAINS = ["keyreply.com"];
+const EXEMPT_DOMAINS = ["keyreply.com", "fortnightcollective.com"];
 const KV_TTL = 86400; // 1 day in seconds
 
 function getTodayKey(ip, assistant) {
