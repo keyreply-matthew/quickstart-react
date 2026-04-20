@@ -10,6 +10,28 @@
 
 const DAILY_LIMIT = 3;
 const EXEMPT_DOMAINS = ["keyreply.com", "fortnightcollective.com"];
+const BLOCKED_DOMAINS = ["commure.com", "hippocraticai.com"];
+const PERSONAL_EMAIL_DOMAINS = [
+  "gmail.com", "googlemail.com",
+  "yahoo.com", "yahoo.co.uk", "yahoo.com.br", "yahoo.co.in",
+  "hotmail.com", "hotmail.co.uk",
+  "outlook.com", "outlook.com.br",
+  "live.com", "live.co.uk",
+  "msn.com",
+  "aol.com",
+  "icloud.com", "me.com", "mac.com",
+  "protonmail.com", "proton.me",
+  "zoho.com",
+  "yandex.com", "yandex.ru",
+  "mail.com", "email.com",
+  "gmx.com", "gmx.net",
+  "fastmail.com",
+  "tutanota.com", "tuta.io",
+  "hey.com",
+  "inbox.com",
+  "rediffmail.com",
+  "uol.com.br", "bol.com.br", "terra.com.br",
+];
 const KV_TTL = 86400; // 1 day in seconds
 
 function getTodayKey(ip, assistant) {
@@ -50,6 +72,22 @@ export async function onRequest(context) {
   const domain = email.split("@")[1] || "";
   if (EXEMPT_DOMAINS.includes(domain)) {
     return jsonResponse({ allowed: true, remaining: 999 }, 200, headers);
+  }
+
+  // Block specific domains
+  if (BLOCKED_DOMAINS.includes(domain)) {
+    return jsonResponse(
+      { allowed: false, remaining: 0, message: "Access denied. Please contact sales@keyreply.com for more information." },
+      200, headers
+    );
+  }
+
+  // Block personal email domains
+  if (PERSONAL_EMAIL_DOMAINS.includes(domain)) {
+    return jsonResponse(
+      { allowed: false, remaining: 0, message: "Please use your work email address to access this demo." },
+      200, headers
+    );
   }
 
   if (!kv) {
