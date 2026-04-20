@@ -455,6 +455,12 @@ const App = () => {
             {callsRemaining} demo{callsRemaining === 1 ? "" : "s"} remaining today
           </div>
         )}
+        <div className="mt-4 text-xs text-gray-400 text-center">
+          Interested in learning more? Reach us at{' '}
+          <a href="mailto:sales@keyreply.com" className="underline text-blue-400 hover:text-blue-300">
+            sales@keyreply.com
+          </a>
+        </div>
       </div>
     );
   };
