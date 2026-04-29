@@ -54,7 +54,9 @@ const initialAssistants = {
   "changebridge-workflow": { id: "2a17ccc1-9189-4914-bab6-3b8284b04afc", name: "Changebridge Medical Associates" },
   "changebridge-max": { id: "0b8fb0fb-edb9-4d24-9e0a-fee26ed1bdda", name: "Changebridge Medical Associates" },
   "changebridge": { id: "0b8fb0fb-edb9-4d24-9e0a-fee26ed1bdda", name: "Changebridge Medical Associates" },
-  "careshield-appointment": { id: "413e971a-ee4f-4b6b-a029-4de6d05862bf", name: "Careshield Appointment" }
+  "careshield-appointment": { id: "413e971a-ee4f-4b6b-a029-4de6d05862bf", name: "Careshield Appointment" },
+  "careshield": { id: "1b2a984b-5395-4217-96ba-a4460db19daf", name: "CareShield Life" },
+  "medishield": { id: "c75a4e5a-a0fa-432b-b4df-a6ce23cc18bb", name: "MediShield Life" }
 };
 
 
