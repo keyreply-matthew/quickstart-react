@@ -463,6 +463,17 @@ const App = () => {
             sales@keyreply.com
           </a>
         </div>
+        <div className="mt-3 text-xs text-gray-500 text-center">
+          Powered by{' '}
+          <a
+            href="https://keyreply.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:text-blue-300 underline"
+          >
+            KeyReply
+          </a>
+        </div>
       </div>
     );
   };
