@@ -12,7 +12,7 @@ const DAILY_LIMIT = 3;
 const EXEMPT_DOMAINS = ["keyreply.com", "fortnightcollective.com"];
 // Assistant slugs (prefix match) that bypass rate limiting and email gating entirely.
 // Use for demos actively being shown by sales — friction-free for prospects.
-const EXEMPT_ASSISTANTS = ["medishield", "careshield"];
+const EXEMPT_ASSISTANTS = ["medishield", "careshield", "wealth-nicole"];
 const BLOCKED_DOMAINS = ["commure.com", "hippocraticai.com"];
 const PERSONAL_EMAIL_DOMAINS = [
   "gmail.com", "googlemail.com",
