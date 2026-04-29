@@ -10,6 +10,9 @@
 
 const DAILY_LIMIT = 3;
 const EXEMPT_DOMAINS = ["keyreply.com", "fortnightcollective.com"];
+// Assistant slugs (prefix match) that bypass rate limiting and email gating entirely.
+// Use for demos actively being shown by sales — friction-free for prospects.
+const EXEMPT_ASSISTANTS = ["medishield", "careshield"];
 const BLOCKED_DOMAINS = ["commure.com", "hippocraticai.com"];
 const PERSONAL_EMAIL_DOMAINS = [
   "gmail.com", "googlemail.com",
@@ -67,6 +70,12 @@ export async function onRequest(context) {
   const assistant = url.searchParams.get("assistant") || "kira";
   const email = (url.searchParams.get("email") || "").toLowerCase();
   const kv = env.RATE_LIMIT;
+
+  // Exempt specific demo assistants entirely (sales-driven demos).
+  // Bypasses rate limit AND email gating so prospects can use any email.
+  if (EXEMPT_ASSISTANTS.some(p => assistant.startsWith(p))) {
+    return jsonResponse({ allowed: true, remaining: 999 }, 200, headers);
+  }
 
   // Exempt internal emails — always allow
   const domain = email.split("@")[1] || "";
