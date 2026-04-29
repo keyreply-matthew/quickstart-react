@@ -83,11 +83,7 @@ const App = () => {
   // Vapi instance depends on selected; manage with ref and effect
   const vapiRef = useRef(null);
   useEffect(() => {
-    const key = selected.includes("changebridge")
-      ? VAPI_PUBLIC_KEYS.changebridge
-      : (selected.includes("careshield") || selected.includes("medishield"))
-        ? VAPI_PUBLIC_KEYS.careshield
-        : VAPI_PUBLIC_KEYS.default;
+    const key = selected.includes("changebridge") ? VAPI_PUBLIC_KEYS.changebridge : (selected.includes("careshield-appointment") ? VAPI_PUBLIC_KEYS.careshield : VAPI_PUBLIC_KEYS.default);
     // Route the single HTTP call the SDK makes (POST /call/web) through our own
     // Cloudflare Pages Function so "api.vapi.ai" never appears in the network tab.
     const vapiBaseUrl = `${window.location.origin}/api/vapi`;
