@@ -3,12 +3,12 @@
  *
  * KV namespace binding required: RATE_LIMIT
  * Key format: rate:{ip}:{assistant}:{YYYY-MM-DD}
- * Limit: 3 calls per IP per assistant per day (TTL 86400s, auto-expires)
+ * Limit: 30 calls per IP per assistant per day (TTL 86400s, auto-expires)
  *
  * Query params: ?assistant=<slug>&email=<email>
  */
 
-const DAILY_LIMIT = 3;
+const DAILY_LIMIT = 30;
 const EXEMPT_DOMAINS = ["keyreply.com", "fortnightcollective.com"];
 // Assistant slugs (prefix match) that bypass rate limiting and email gating entirely.
 // Use for demos actively being shown by sales — friction-free for prospects.
